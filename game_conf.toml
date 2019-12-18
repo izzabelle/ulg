@@ -1,0 +1,2 @@
+# load the assets in order
+tile_assets = ["Tiles/Terrain/Grass/grass_05.png"]

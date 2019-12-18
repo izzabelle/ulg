@@ -1,0 +1,14 @@
+[package]
+name = "ulg-rs"
+version = "0.1.0"
+authors = ["Isabelle L. <me@izzabelle.dev>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ggez = "0.5.1"
+serde = "1.0.104"
+serde_derive = "1.0.104"
+toml = "0.5.5"
+mint = "0.5.4"
