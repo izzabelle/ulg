@@ -1,7 +1,12 @@
+use crate::Assets;
 use ggez::graphics;
+use ggez::graphics::DrawParam;
 use ggez::Context;
 use ggez::GameResult as Result;
+use rand::Rng;
 use std::collections::HashMap;
+
+const TILE_DIMENSIONS: (f32, f32) = (120.0, 140.0);
 
 pub struct Map {
     data: HashMap<CubeIndex, Tile>,
@@ -10,14 +15,31 @@ pub struct Map {
 impl Map {
     pub fn new(radius: isize) -> Self {
         let mut data: HashMap<CubeIndex, Tile> = HashMap::new();
+        let mut rng = rand::thread_rng();
         for x in -radius..radius {
             for y in -radius..radius {
                 for z in -radius..radius {
-                    data.insert((x, y, z).into(), Tile::new(0));
+                    data.insert((x, y, z).into(), Tile::new(rng.gen_range(0, 2)));
                 }
             }
         }
         Self { data }
+    }
+
+    pub fn render(&self, ctx: &mut Context, assets: &Assets, offset: (isize, isize)) -> Result<()> {
+        for (location, tile) in self.data.iter() {
+            let img = &assets.tiles[tile.terrain_texture_idx];
+            let location = AxialIndex::from(*location);
+            let x: f32 = offset.0 as f32
+                + location.q as f32 * TILE_DIMENSIONS.0
+                + if location.r % 2 != 0 { TILE_DIMENSIONS.0 / 2.0 } else { 0.0 };
+            let y: f32 = offset.1 as f32
+                + location.r as f32 * TILE_DIMENSIONS.1 as f32
+                + location.r as f32 * -35.0;
+            let param = DrawParam::new().dest(mint::Point2 { x, y });
+            graphics::draw(ctx, img, param)?;
+        }
+        Ok(())
     }
 }
 
@@ -31,14 +53,14 @@ impl Tile {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct CubeIndex {
     pub x: isize,
     pub y: isize,
     pub z: isize,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct AxialIndex {
     pub q: isize,
     pub r: isize,
