@@ -6,7 +6,7 @@ pub enum ButtonState {
 }
 
 pub struct InputHandler {
-    left_click_down: bool,
+    pub left_click_down: bool,
 }
 
 impl InputHandler {
@@ -17,8 +17,8 @@ impl InputHandler {
     pub fn mouse_button_input(&mut self, button: MouseButton, button_state: ButtonState) {
         match button {
             MouseButton::Left => match button_state {
-                ButtonState::Down => self.left_click_down = true,
-                ButtonState::Up => self.left_click_down = false,
+                ButtonState::Down => self.left_click_down = false,
+                ButtonState::Up => self.left_click_down = true,
             },
             _ => {}
         }

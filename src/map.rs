@@ -3,11 +3,13 @@ use ggez::graphics;
 use ggez::graphics::DrawParam;
 use ggez::Context;
 use ggez::GameResult as Result;
+use mint::Point2;
 use rand::Rng;
 use std::collections::HashMap;
 
 const TILE_DIMENSIONS: (f32, f32) = (120.0, 140.0);
 
+#[derive(Debug)]
 pub struct Map {
     data: HashMap<CubeIndex, Tile>,
 }
@@ -19,30 +21,32 @@ impl Map {
         for x in -radius..radius {
             for y in -radius..radius {
                 for z in -radius..radius {
-                    data.insert((x, y, z).into(), Tile::new(rng.gen_range(0, 2)));
+                    data.insert((x, y, z).into(), Tile::new(rng.gen_range(0, 3)));
                 }
             }
         }
         Self { data }
     }
 
-    pub fn render(&self, ctx: &mut Context, assets: &Assets, offset: (isize, isize)) -> Result<()> {
+    pub fn render(&self, ctx: &mut Context, assets: &Assets, offset: &Point2<f32>) -> Result<()> {
         for (location, tile) in self.data.iter() {
             let img = &assets.tiles[tile.terrain_texture_idx];
             let location = AxialIndex::from(*location);
-            let x: f32 = offset.0 as f32
+            let x: f32 = offset.x
                 + location.q as f32 * TILE_DIMENSIONS.0
                 + if location.r % 2 != 0 { TILE_DIMENSIONS.0 / 2.0 } else { 0.0 };
-            let y: f32 = offset.1 as f32
-                + location.r as f32 * TILE_DIMENSIONS.1 as f32
-                + location.r as f32 * -35.0;
-            let param = DrawParam::new().dest(mint::Point2 { x, y });
-            graphics::draw(ctx, img, param)?;
+            let y: f32 =
+                offset.y + location.r as f32 * TILE_DIMENSIONS.1 as f32 + location.r as f32 * -35.0;
+            if x > -150.0 && x < 800.0 && y > -150.0 && y < 600.0 {
+                let param = DrawParam::new().dest(mint::Point2 { x: x.floor(), y: y.floor() });
+                graphics::draw(ctx, img, param)?;
+            }
         }
         Ok(())
     }
 }
 
+#[derive(Debug)]
 pub struct Tile {
     terrain_texture_idx: usize,
 }
