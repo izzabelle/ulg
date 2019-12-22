@@ -3,6 +3,8 @@ use serde_derive::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub tile_assets: Vec<String>,
+    pub outline: String,
+    pub font: String,
 }
 
 impl Config {

@@ -4,3 +4,5 @@ tile_assets = [
 	"/Tiles/Terrain/Dirt/dirt_06.png",
 	"/Tiles/Terrain/Stone/stone_07.png",
 ]
+outline = "/outline.png"
+font = "/iosevka-term-ss09-oblique.ttf"
