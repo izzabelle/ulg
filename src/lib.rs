@@ -1,9 +1,12 @@
+#![forbid(clippy::pedantic)]
+
 // modules
 mod assets;
 mod config;
 mod debug;
 mod input;
 mod map;
+mod utils;
 
 // ggez namespacing
 use ggez::{
@@ -21,6 +24,8 @@ use crate::input::InputHandler;
 use crate::map::Map;
 use mint::Point2;
 
+pub const TILE_DIMENSIONS: Point2<f32> = Point2 { x: 120.0, y: 140.0 };
+
 // wrap main to throw errors easier
 pub fn main_wrapper() -> Result<()> {
     let cb = ContextBuilder::new("ULG", "Isabelle L.")
@@ -37,29 +42,31 @@ pub struct Ulg {
     pub input_handler: InputHandler,
     pub window_dimension_x: f32,
     pub window_dimension_y: f32,
-    pub view_offset: Point2<f32>,
     pub assets: Assets,
     pub map: Map,
 }
 
+#[allow(dead_code)]
 impl Ulg {
     fn new(ctx: &mut Context) -> Result<Self> {
-        let map = Map::new(5);
+        let map = Map::new(TILE_DIMENSIONS.x / 3.0_f32.sqrt(), 50, Point2 { x: 800.0, y: 450.0 });
         let config = Config::load("game_conf.toml");
         let assets = Assets::load(ctx, &config)?;
-        let view_offset = Point2 { x: 0.0, y: 0.0 };
         Ok(Self {
             map,
             _config: config,
             assets,
-            view_offset,
             input_handler: InputHandler::new(),
             window_dimension_x: 1600.0,
             window_dimension_y: 900.0,
         })
     }
 
-    fn window_dimensions(&self) -> (f32, f32) {
+    fn window_dimensions_point2(&self) -> Point2<f32> {
+        Point2 { x: self.window_dimension_x, y: self.window_dimension_y }
+    }
+
+    fn window_dimensions_tuple_f32(&self) -> (f32, f32) {
         (self.window_dimension_x, self.window_dimension_y)
     }
 }
@@ -69,16 +76,16 @@ impl EventHandler for Ulg {
         // handle input
 
         // mouse location
-        self.input_handler.mouse_location_from_center(ctx, self.window_dimensions());
+        self.input_handler.mouse_location_from_center(ctx, self.window_dimensions_tuple_f32());
 
         // move offset when left click button pressed down
         if self.input_handler.left_click_down {
             ggez::input::mouse::set_cursor_hidden(ctx, true);
             let m_delta = ggez::input::mouse::delta(ctx);
             if m_delta.x > 5.0 || m_delta.y > 5.0 || m_delta.x < -5.0 || m_delta.y < -5.0 {
-                self.view_offset = Point2 {
-                    x: self.view_offset.x + m_delta.x / 2.0,
-                    y: self.view_offset.y + m_delta.y / 2.0,
+                self.map.view_offset = Point2 {
+                    x: self.map.view_offset.x + m_delta.x / 2.0,
+                    y: self.map.view_offset.y + m_delta.y / 2.0,
                 };
             }
         } else {
@@ -90,8 +97,7 @@ impl EventHandler for Ulg {
 
     fn draw(&mut self, ctx: &mut Context) -> Result<()> {
         graphics::clear(ctx, graphics::WHITE);
-        self.map.render_tiles(ctx, &self.assets, &self.view_offset, self.window_dimensions())?;
-        self.map.render_outline(ctx, &self.assets, &self.view_offset)?;
+        self.map.render_tiles(ctx, &self.assets, self.window_dimensions_tuple_f32())?;
         // dbg
         crate::debug::debug_print(&self, ctx)?;
         graphics::present(ctx)?;

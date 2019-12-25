@@ -6,10 +6,11 @@ use mint::Point2;
 
 pub fn debug_print(game_state: &Ulg, ctx: &mut Context) -> Result<()> {
     let debug_info = format!(
-        "debug info:\n============\nfps: {:?}\nmouse: {:?}\nmap offset: {:?}",
+        "debug info:\n============\nfps: {:?}\nmouse coord: {:?}\nmouse over: {:?}\nmap offset: {:?}",
         ggez::timer::fps(ctx),
         game_state.input_handler.mouse_location_from_center,
-        game_state.view_offset,
+        game_state.map.mouse_over,
+        game_state.map.view_offset,
     );
     let text = Text::new(TextFragment {
         text: debug_info,
