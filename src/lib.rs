@@ -24,19 +24,21 @@ use crate::input::InputHandler;
 use crate::map::Map;
 use mint::Point2;
 
+// consts
 pub const TILE_DIMENSIONS: Point2<f32> = Point2 { x: 120.0, y: 140.0 };
 
 // wrap main to throw errors easier
 pub fn main_wrapper() -> Result<()> {
-    let cb = ContextBuilder::new("ULG", "Isabelle L.")
+    let cb = ContextBuilder::new("Fucking Hexagons", "Isabelle L.")
         .add_resource_path("./resources")
-        .window_setup(WindowSetup { title: "U.L.G.".to_owned(), ..Default::default() })
+        .window_setup(WindowSetup { title: "Fucking Hexagons".to_owned(), ..Default::default() })
         .window_mode(WindowMode { width: 1600.0, height: 900.0, ..Default::default() });
     let (mut ctx, mut event_loop) = cb.build()?;
     let mut ulg = Ulg::new(&mut ctx)?;
     event::run(&mut ctx, &mut event_loop, &mut ulg)
 }
 
+// primary game struct
 pub struct Ulg {
     pub _config: Config,
     pub input_handler: InputHandler,
@@ -49,7 +51,7 @@ pub struct Ulg {
 #[allow(dead_code)]
 impl Ulg {
     fn new(ctx: &mut Context) -> Result<Self> {
-        let map = Map::new(TILE_DIMENSIONS.x / 3.0_f32.sqrt(), 50, Point2 { x: 800.0, y: 450.0 });
+        let map = Map::new(TILE_DIMENSIONS.x / 3.0_f32.sqrt(), 3, Point2 { x: 800.0, y: 450.0 });
         let config = Config::load("game_conf.toml");
         let assets = Assets::load(ctx, &config)?;
         Ok(Self {
@@ -73,31 +75,17 @@ impl Ulg {
 
 impl EventHandler for Ulg {
     fn update(&mut self, ctx: &mut Context) -> Result<()> {
-        // handle input
-
         // mouse location
         self.input_handler.mouse_location_from_center(ctx, self.window_dimensions_tuple_f32());
-
-        // move offset when left click button pressed down
-        if self.input_handler.left_click_down {
-            ggez::input::mouse::set_cursor_hidden(ctx, true);
-            let m_delta = ggez::input::mouse::delta(ctx);
-            if m_delta.x > 5.0 || m_delta.y > 5.0 || m_delta.x < -5.0 || m_delta.y < -5.0 {
-                self.map.view_offset = Point2 {
-                    x: self.map.view_offset.x + m_delta.x / 2.0,
-                    y: self.map.view_offset.y + m_delta.y / 2.0,
-                };
-            }
-        } else {
-            ggez::input::mouse::set_cursor_hidden(ctx, false);
-        }
+        // map update
+        self.map.update(ctx, &self.input_handler);
 
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> Result<()> {
         graphics::clear(ctx, graphics::WHITE);
-        self.map.render_tiles(ctx, &self.assets, self.window_dimensions_tuple_f32())?;
+        self.map.render(ctx, &self.assets, self.window_dimensions_tuple_f32())?;
         // dbg
         crate::debug::debug_print(&self, ctx)?;
         graphics::present(ctx)?;

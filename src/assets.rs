@@ -6,6 +6,7 @@ use ggez::GameResult as Result;
 pub struct Assets {
     pub tiles: Vec<Image>,
     pub outline: Image,
+    pub outline_corners: Image,
     pub font: Font,
 }
 
@@ -16,7 +17,8 @@ impl Assets {
             tiles.push(Image::new(ctx, &path)?);
         }
         let outline = Image::new(ctx, config.outline.clone())?;
+        let outline_corners = Image::new(ctx, config.outline_corners.clone())?;
         let font = Font::new(ctx, config.font.clone())?;
-        Ok(Assets { tiles, outline, font })
+        Ok(Assets { tiles, outline, outline_corners, font })
     }
 }

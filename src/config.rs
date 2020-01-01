@@ -4,6 +4,7 @@ use serde::Deserialize;
 pub struct Config {
     pub tile_assets: Vec<String>,
     pub outline: String,
+    pub outline_corners: String,
     pub font: String,
 }
 
